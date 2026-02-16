@@ -855,7 +855,7 @@ function initTZSelector() {
       const opt = document.createElement("option");
       opt.value = z.tz;
       opt.textContent = z.label;
-      if (z.tz === detectedTZ) opt.textContent += " ✦";
+      if (z.tz === detectedTZ) opt.textContent += " ●";
       optgroup.appendChild(opt);
     });
     select.appendChild(optgroup);
@@ -872,7 +872,7 @@ function initTZSelector() {
   if (!foundDetected) {
     const opt = document.createElement("option");
     opt.value = detectedTZ;
-    opt.textContent = detectedTZ.replace(/_/g, " ") + " (detected) ✦";
+    opt.textContent = detectedTZ.replace(/_/g, " ") + " (detected) ●";
     select.insertBefore(opt, select.firstChild);
   }
 
@@ -988,7 +988,6 @@ const offices = [
   { name: "London, England",                                    tz: "Europe/London",       lat: 51.51,  lon:  -0.13, openH: 8, closeH: 16 },
   { name: "Naples & Sigonella, Italy; Rota, Spain",            tz: "Europe/Rome",         lat: 40.85,  lon:  14.27, openH: 8, closeH: 16 },
   { name: "Bahrain",                                            tz: "Asia/Bahrain",        lat: 26.23,  lon:  50.58, openH: 8, closeH: 16 },
-  { name: "Diego Garcia",                                       tz: "Indian/Chagos",       lat: -7.32,  lon:  72.42, openH: 8, closeH: 16 },
 ];
 
 const allMarkers = [
@@ -1009,7 +1008,6 @@ const allMarkers = [
   { parent: 7, label: "Sigonella, Italy",     lat: 37.40,  lon:  14.92 },
   { parent: 7, label: "Rota, Spain",          lat: 36.62,  lon:  -6.35 },
   { parent: 8, label: "Bahrain",              lat: 26.23,  lon:  50.58 },
-  { parent: 9, label: "Diego Garcia",         lat: -7.32,  lon:  72.42 },
 ];
 
 // Country → approx UTC offset (ISO numeric code → offset)
