@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Navy Legal Assistance Global Coverage</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0c0f14;
+    --surface: #141820;
+    --surface2: #1a1f2b;
+    --border: #252b3a;
+    --text: #e0e4ec;
+    --text-dim: #6b7280;
+    --gold: #d4a017;
+    --gold-light: #f5c842;
+    --green: #22c55e;
+    --green-dim: rgba(34, 197, 94, 0.12);
+    --red-dim: rgba(100, 116, 139, 0.1);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .dashboard {
+    position: relative;
+    z-index: 1;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 28px 24px;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .header h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .top-row {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    animation: fadeUp 0.5s ease-out both;
+  }
+  .panel:nth-child(2) { animation-delay: 0.08s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .panel-header {
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface2);
+  }
+
+  .panel-header span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .clock-body {
+    padding: 22px 18px;
+    text-align: center;
+  }
+
+  .utc-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .utc-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 52px;
+    font-weight: 700;
+    color: var(--gold-light);
+    line-height: 1;
+    letter-spacing: 2px;
+  }
+
+  .utc-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    color: var(--text-dim);
+    margin-top: 8px;
+  }
+
+  .local-row {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .local-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  .local-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .offices-body {
+    padding: 6px 0;
+    max-height: 210px;
+    overflow-y: auto;
+  }
+
+  .offices-body::-webkit-scrollbar { width: 4px; }
+  .offices-body::-webkit-scrollbar-track { background: transparent; }
+  .offices-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .office-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto auto;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 18px;
+    transition: background 0.15s;
+  }
+
+  .office-row:hover { background: rgba(255,255,255,0.02); }
+
+  .status-badge { width: 7px; height: 7px; border-radius: 50%; }
+  .status-badge.open { background: var(--green); box-shadow: 0 0 6px rgba(34,197,94,0.4); }
+  .status-badge.closed { background: #64748b; opacity: 0.5; }
+
+  .office-name {
+    font-size: 18px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .office-row.closed .office-name,
+  .office-row.closed .office-local-time { color: var(--text-dim); }
+
+  .office-local-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 17px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .office-status-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .office-status-text.open { color: var(--green); background: var(--green-dim); }
+  .office-status-text.closed { color: var(--text-dim); background: var(--red-dim); }
+
+  .office-countdown {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 500;
+    white-space: nowrap;
+    min-width: 90px;
+    text-align: right;
+  }
+
+  .office-countdown.open {
+    color: #a3e635;
+  }
+
+  .office-countdown.closing-soon {
+    color: #fb923c;
+  }
+
+  .office-countdown.closed {
+    color: var(--text-dim);
+  }
+
+  .open-count {
+    padding: 10px 18px;
+    border-top: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    color: var(--text-dim);
+  }
+
+  .open-count strong { color: var(--gold-light); }
+
+  /* ── Map ───────────────────────────────── */
+  .map-panel { animation-delay: 0.15s; margin-bottom: 18px; }
+
+  .map-container {
+    position: relative;
+    padding: 16px;
+    background: #080b10;
+  }
+
+  .map-container svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    touch-action: none;
+    cursor: grab;
+  }
+
+  .map-container svg:active { cursor: grabbing; }
+
+  .map-zoom-controls {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 50;
+  }
+
+  .map-zoom-btn {
+    width: 47px;
+    height: 47px;
+    background: #1a1f2bee;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--text);
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    backdrop-filter: blur(8px);
+    padding: 0;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .map-zoom-btn:hover {
+    background: var(--gold);
+    color: var(--bg);
+    border-color: var(--gold);
+  }
+
+  .map-zoom-reset {
+    position: absolute;
+    bottom: 16px;
+    right: 24px;
+    left: auto;
+    top: auto;
+    transform: none;
+    margin-top: 0;
+    width: auto;
+    height: auto;
+    padding: 6px 16px;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--bg);
+    background: var(--gold);
+    border: 1px solid var(--gold);
+  }
+
+  .map-zoom-reset:hover {
+    background: var(--gold-light);
+    color: var(--bg);
+    border-color: var(--gold-light);
+  }
+
+  .graticule { fill: none; stroke: rgba(255,255,255,0.035); stroke-width: 0.3; }
+
+  .office-marker { cursor: pointer; }
+
+  .marker-pulse {
+    fill: none;
+    stroke: var(--gold-light);
+    stroke-width: 1;
+    opacity: 0;
+    animation: mPulse 2.5s ease-out infinite;
+  }
+
+  .marker-glow-pulse {
+    /* unused — kept for reference */
+  }
+
+  @keyframes zoneGlow {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 0.75; }
+  }
+
+  @keyframes mPulse {
+    0% { r: 4; opacity: 0.6; }
+    100% { r: 16; opacity: 0; }
+  }
+
+  /* ── Tooltip ───────────────────────────── */
+  .map-tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: #181d28ee;
+    border: 1px solid #2e3650;
+    border-radius: 10px;
+    padding: 16px 18px;
+    min-width: 340px;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.15s;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+  }
+
+  .map-tooltip.visible { opacity: 1; }
+  .map-tooltip.pinned { pointer-events: auto; }
+
+  .tt-location {
+    font-size: 21px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+
+  .tt-status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .tt-status.open { color: var(--green); }
+  .tt-status.closed { color: var(--text-dim); }
+
+  .tt-status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .tt-status.open .tt-status-dot { background: var(--green); box-shadow: 0 0 6px rgba(34,197,94,0.5); }
+  .tt-status.closed .tt-status-dot { background: var(--text-dim); }
+
+  .tt-divider { border: none; border-top: 1px solid #2e3650; margin: 0 0 10px; }
+
+  .tt-section-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    color: var(--gold);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .tt-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 0;
+  }
+
+  .tt-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+  }
+
+  .tt-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .tt-spacer { height: 10px; }
+
+  /* ── Legend ─────────────────────────────── */
+  .map-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .legend-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+
+  .legend-swatch {
+    width: 14px; height: 14px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+  }
+
+  .legend-swatch.open-swatch {
+    background: #2e5025;
+  }
+
+  @keyframes legendZoneGlow {
+    0%, 100% { box-shadow: 0 0 3px rgba(58,104,48,0.3); }
+    50% { box-shadow: 0 0 10px rgba(58,104,48,0.8); }
+  }
+  .legend-swatch.closed-swatch { background: #161c28; }
+
+  .legend-swatch.user-tz-swatch {
+    background: rgba(180, 180, 200, 0.12);
+    border: 1px dashed rgba(200, 200, 220, 0.4);
+  }
+
+  .legend-swatch.marker-open-swatch {
+    background: var(--gold-light);
+    border-radius: 50%;
+    width: 10px; height: 10px;
+    border: 2px solid var(--gold);
+  }
+
+  @keyframes swatchGlow {
+    0%, 100% { box-shadow: 0 0 4px rgba(245,200,66,0.3); }
+    50% { box-shadow: 0 0 10px rgba(245,200,66,0.7); }
+  }
+
+  .legend-swatch.marker-closed-swatch {
+    background: #6b7280;
+    border-radius: 50%;
+    width: 10px; height: 10px;
+    border: 2px solid #4b5563;
+  }
+
+  .legend-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    color: var(--text-dim);
+  }
+
+  /* ── TZ Selector ──────────────────────── */
+  .tz-selector-bar {
+    margin-bottom: 18px;
+    animation: fadeUp 0.35s ease-out both;
+  }
+
+  .tz-selector-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 18px;
+    flex-wrap: wrap;
+  }
+
+  .tz-select-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  #tzSelect {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 19px;
+    min-width: 280px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' fill='none' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+  }
+
+  #tzSelect:hover, #tzSelect:focus { border-color: var(--gold); }
+
+  #tzSelect option {
+    background: var(--surface2);
+    color: var(--text);
+    padding: 4px;
+  }
+
+  .tz-reset-btn {
+    background: transparent;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .tz-reset-btn:hover {
+    background: var(--gold);
+    color: var(--bg);
+  }
+
+  .tz-detected {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    color: var(--text-dim);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  /* ── Time Simulator ────────────────────── */
+  .sim-bar { animation-delay: 0.05s; }
+
+  .sim-input {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    color-scheme: dark;
+  }
+
+  .sim-input:hover, .sim-input:focus { border-color: var(--gold); }
+
+  .sim-time-military {
+    width: 100px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 2px;
+  }
+
+  .sim-go-btn {
+    background: var(--gold);
+    color: var(--bg);
+    border: 1px solid var(--gold);
+    border-radius: 6px;
+    padding: 7px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .sim-go-btn:hover {
+    background: var(--gold-light);
+    border-color: var(--gold-light);
+  }
+
+  .sim-mode-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #fb923c;
+    background: rgba(251,146,60,0.12);
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid rgba(251,146,60,0.3);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 960px) {
+    .top-row { grid-template-columns: 1fr; }
+    .utc-time { font-size: 42px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="dashboard">
+  <div class="header">
+    <h1>Navy Legal Assistance Global Coverage</h1>
+  </div>
+
+  <div class="tz-selector-bar">
+    <div class="tz-selector-inner">
+      <label class="tz-select-label" for="tzSelect">Your timezone</label>
+      <select id="tzSelect"></select>
+      <button id="tzReset" class="tz-reset-btn" style="display:none;">Reset to detected</button>
+      <span class="tz-detected" id="tzDetected"></span>
+    </div>
+  </div>
+
+  <div class="tz-selector-bar sim-bar">
+    <div class="tz-selector-inner">
+      <label class="tz-select-label">Time simulator</label>
+      <input type="date" id="simDate" class="sim-input">
+      <input type="text" id="simTimeInput" class="sim-input sim-time-military" placeholder="HH:MM" maxlength="5">
+      <button id="simGo" class="sim-go-btn">Simulate</button>
+      <button id="simLive" class="tz-reset-btn" style="display:none;">Back to Live</button>
+      <span class="sim-mode-badge" id="simIndicator" style="display:none;">SIMULATED</span>
+    </div>
+  </div>
+
+  <div class="top-row">
+    <div class="panel clock-panel">
+      <div class="panel-header">
+        
+        <span>Current Time</span>
+      </div>
+      <div class="clock-body">
+        <div class="utc-label" id="localLabel">Your Local Time</div>
+        <div class="utc-time" id="localTime">--:--:--</div>
+        <div class="utc-date" id="localDate">---</div>
+        <div class="local-row">
+          <span class="local-label">UTC:</span>
+          <span class="local-time" id="utcTime">--:--:--</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        
+        <span>Office Status</span>
+      </div>
+      <div class="offices-body" id="officesList"></div>
+      <div class="open-count" id="openCount"></div>
+    </div>
+  </div>
+
+  <div class="panel map-panel" id="mapPanel">
+    <div class="panel-header">
+      
+      <span>World Coverage Map</span>
+    </div>
+    <div class="map-legend">
+      <div class="legend-row">
+        <div class="legend-item">
+          <div class="legend-swatch open-swatch"></div>
+          <span class="legend-label">Within office hours</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-swatch closed-swatch"></div>
+          <span class="legend-label">Outside office hours</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-swatch user-tz-swatch"></div>
+          <span class="legend-label">Your timezone</span>
+        </div>
+      </div>
+      <div class="legend-row">
+        <div class="legend-item">
+          <div class="legend-swatch marker-open-swatch"></div>
+          <span class="legend-label">Office open</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-swatch marker-closed-swatch"></div>
+          <span class="legend-label">Office closed</span>
+        </div>
+      </div>
+    </div>
+    <div class="map-container" id="mapContainer">
+      <div class="map-tooltip" id="tooltip"></div>
+      <div class="map-zoom-controls">
+        <button id="zoomIn" class="map-zoom-btn" title="Zoom in">+</button>
+        <button id="zoomOut" class="map-zoom-btn" title="Zoom out">−</button>
+      </div>
+      <button id="zoomReset" class="map-zoom-btn map-zoom-reset" title="Reset view">RESET</button>
+    </div>
+  </div>
+
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// TIME SIMULATION
+// ═══════════════════════════════════════════════════════════════
+let simTime = null; // null = live, Date object = simulated
+function getNow() { return simTime ? new Date(simTime) : new Date(); }
+
+// ═══════════════════════════════════════════════════════════════
+// TIMEZONE SELECTOR
+// ═══════════════════════════════════════════════════════════════
+const detectedTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+let selectedTZ = detectedTZ;
+
+const tzOptions = [
+  { group: "North America", zones: [
+    { tz: "America/New_York",      label: "Eastern Time (ET)" },
+    { tz: "America/Chicago",       label: "Central Time (CT)" },
+    { tz: "America/Denver",        label: "Mountain Time (MT)" },
+    { tz: "America/Los_Angeles",   label: "Pacific Time (PT)" },
+    { tz: "America/Anchorage",     label: "Alaska Time (AKT)" },
+    { tz: "Pacific/Honolulu",      label: "Hawaii Time (HT)" },
+    { tz: "America/Phoenix",       label: "Arizona (no DST)" },
+    { tz: "America/Halifax",       label: "Atlantic Time (AT)" },
+    { tz: "America/St_Johns",      label: "Newfoundland Time (NT)" },
+  ]},
+  { group: "Europe", zones: [
+    { tz: "Europe/London",         label: "Greenwich Mean Time (GMT)" },
+    { tz: "Europe/Paris",          label: "Central European Time (CET)" },
+    { tz: "Europe/Helsinki",       label: "Eastern European Time (EET)" },
+    { tz: "Europe/Moscow",         label: "Moscow Time (MSK)" },
+    { tz: "Europe/Istanbul",       label: "Turkey Time (TRT)" },
+  ]},
+  { group: "Asia & Middle East", zones: [
+    { tz: "Asia/Dubai",            label: "Gulf Standard Time (GST)" },
+    { tz: "Asia/Bahrain",          label: "Arabia Standard Time (AST)" },
+    { tz: "Asia/Karachi",          label: "Pakistan Time (PKT)" },
+    { tz: "Asia/Kolkata",          label: "India Standard Time (IST)" },
+    { tz: "Asia/Dhaka",            label: "Bangladesh Time (BST)" },
+    { tz: "Indian/Chagos",         label: "Indian Ocean Time (IOT)" },
+    { tz: "Asia/Bangkok",          label: "Indochina Time (ICT)" },
+    { tz: "Asia/Singapore",        label: "Singapore Time (SGT)" },
+    { tz: "Asia/Shanghai",         label: "China Standard Time (CST)" },
+    { tz: "Asia/Tokyo",            label: "Japan Standard Time (JST)" },
+    { tz: "Asia/Seoul",            label: "Korea Standard Time (KST)" },
+  ]},
+  { group: "Pacific & Oceania", zones: [
+    { tz: "Pacific/Guam",          label: "Chamorro Standard Time (ChST)" },
+    { tz: "Australia/Sydney",      label: "Australian Eastern Time (AET)" },
+    { tz: "Australia/Adelaide",    label: "Australian Central Time (ACT)" },
+    { tz: "Australia/Perth",       label: "Australian Western Time (AWT)" },
+    { tz: "Pacific/Auckland",      label: "New Zealand Time (NZT)" },
+    { tz: "Pacific/Fiji",          label: "Fiji Time (FJT)" },
+  ]},
+  { group: "South America", zones: [
+    { tz: "America/Sao_Paulo",     label: "Brasília Time (BRT)" },
+    { tz: "America/Argentina/Buenos_Aires", label: "Argentina Time (ART)" },
+    { tz: "America/Santiago",      label: "Chile Time (CLT)" },
+    { tz: "America/Bogota",        label: "Colombia Time (COT)" },
+    { tz: "America/Lima",          label: "Peru Time (PET)" },
+  ]},
+  { group: "Africa", zones: [
+    { tz: "Africa/Cairo",          label: "Eastern Africa Time (EAT)" },
+    { tz: "Africa/Lagos",          label: "West Africa Time (WAT)" },
+    { tz: "Africa/Johannesburg",   label: "South Africa Time (SAST)" },
+    { tz: "Africa/Nairobi",        label: "East Africa Time (EAT)" },
+    { tz: "Africa/Casablanca",     label: "Morocco Time" },
+  ]},
+  { group: "Other", zones: [
+    { tz: "UTC",                    label: "Coordinated Universal Time (UTC)" },
+  ]},
+];
+
+function getUserTZLabel() {
+  for (const g of tzOptions) {
+    for (const z of g.zones) {
+      if (z.tz === selectedTZ) return z.label;
+    }
+  }
+  return selectedTZ.replace(/_/g, " ").split("/").pop();
+}
+
+function getUserTZShort() {
+  const label = getUserTZLabel();
+  const match = label.match(/\(([^)]+)\)/);
+  return match ? match[1] : label;
+}
+
+function initTZSelector() {
+  const select = document.getElementById("tzSelect");
+  const resetBtn = document.getElementById("tzReset");
+  const detectedEl = document.getElementById("tzDetected");
+
+  // Build options
+  tzOptions.forEach(group => {
+    const optgroup = document.createElement("optgroup");
+    optgroup.label = group.group;
+    group.zones.forEach(z => {
+      const opt = document.createElement("option");
+      opt.value = z.tz;
+      opt.textContent = z.label;
+      if (z.tz === detectedTZ) opt.textContent += " ✦";
+      optgroup.appendChild(opt);
+    });
+    select.appendChild(optgroup);
+  });
+
+  // If detected TZ isn't in our list, add it
+  let foundDetected = false;
+  for (const g of tzOptions) {
+    for (const z of g.zones) {
+      if (z.tz === detectedTZ) { foundDetected = true; break; }
+    }
+    if (foundDetected) break;
+  }
+  if (!foundDetected) {
+    const opt = document.createElement("option");
+    opt.value = detectedTZ;
+    opt.textContent = detectedTZ.replace(/_/g, " ") + " (detected) ✦";
+    select.insertBefore(opt, select.firstChild);
+  }
+
+  select.value = detectedTZ;
+  detectedEl.textContent = `Detected: ${detectedTZ.replace(/_/g, " ")}`;
+
+  select.addEventListener("change", () => {
+    selectedTZ = select.value;
+    const isCustom = selectedTZ !== detectedTZ;
+    resetBtn.style.display = isCustom ? "inline-block" : "none";
+    updateAll();
+  });
+
+  resetBtn.addEventListener("click", () => {
+    selectedTZ = detectedTZ;
+    select.value = detectedTZ;
+    resetBtn.style.display = "none";
+    updateAll();
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TIME SIMULATOR
+// ═══════════════════════════════════════════════════════════════
+function initTimeSim() {
+  const dateInput = document.getElementById("simDate");
+  const timeInput = document.getElementById("simTimeInput");
+  const goBtn = document.getElementById("simGo");
+  const liveBtn = document.getElementById("simLive");
+
+  // Default inputs to current time in selected TZ
+  function setDefaultInputs() {
+    const now = new Date();
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: selectedTZ, year: "numeric", month: "2-digit", day: "2-digit"
+    }).format(now);
+    const h = new Intl.DateTimeFormat("en-GB", {
+      timeZone: selectedTZ, hour: "2-digit", minute: "2-digit", hour12: false
+    }).format(now);
+    dateInput.value = parts;
+    timeInput.value = h;
+  }
+  setDefaultInputs();
+
+  // Auto-format: insert colon after 2 digits
+  timeInput.addEventListener("input", () => {
+    let v = timeInput.value.replace(/[^0-9]/g, "");
+    if (v.length > 4) v = v.slice(0, 4);
+    if (v.length > 2) v = v.slice(0, 2) + ":" + v.slice(2);
+    timeInput.value = v;
+  });
+
+  // Validate HH:MM military time
+  function parseTime(str) {
+    const m = str.match(/^(\d{2}):(\d{2})$/);
+    if (!m) return null;
+    const hour = parseInt(m[1]), minute = parseInt(m[2]);
+    if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
+    return { hour, minute };
+  }
+
+  goBtn.addEventListener("click", () => {
+    const time = parseTime(timeInput.value);
+    if (!dateInput.value || !time) {
+      timeInput.style.borderColor = "#ef4444";
+      setTimeout(() => timeInput.style.borderColor = "", 1500);
+      return;
+    }
+    const [year, month, day] = dateInput.value.split("-").map(Number);
+    const { hour, minute } = time;
+
+    const tentative = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
+    const tzStr = tentative.toLocaleString("en-US", { timeZone: selectedTZ });
+    const tzDate = new Date(tzStr);
+    const utcStr = tentative.toLocaleString("en-US", { timeZone: "UTC" });
+    const utcDate = new Date(utcStr);
+    const offsetMs = utcDate - tzDate;
+
+    simTime = new Date(tentative.getTime() + offsetMs);
+    liveBtn.style.display = "inline-block";
+    updateAll();
+  });
+
+  liveBtn.addEventListener("click", () => {
+    simTime = null;
+    liveBtn.style.display = "none";
+    setDefaultInputs();
+    updateAll();
+  });
+}
+
+function updateAll() {
+  updateClocks();
+  if (typeof _mapFeatures !== "undefined" && _mapFeatures) {
+    drawTZBands();
+    drawOfficeZones();
+    drawCountries(_mapFeatures);
+    drawUserTZBand();
+    drawMarkers();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════════
+const offices = [
+  { name: "Yokosuka & Sasebo, Japan",                          tz: "Asia/Tokyo",          lat: 35.28,  lon: 139.67, openH: 8, closeH: 16 },
+  { name: "Agana, Guam",                                       tz: "Pacific/Guam",        lat: 13.47,  lon: 144.75, openH: 8, closeH: 16 },
+  { name: "Pearl Harbor, HI",                                  tz: "Pacific/Honolulu",    lat: 21.35,  lon:-157.95, openH: 8, closeH: 16 },
+  { name: "San Diego, CA & Bremerton, WA",                     tz: "America/Los_Angeles", lat: 32.71,  lon:-117.16, openH: 8, closeH: 16 },
+  { name: "Pensacola, FL; Great Lakes, IL; Fort Worth, TX",    tz: "America/Chicago",     lat: 30.44,  lon: -87.19, openH: 8, closeH: 16 },
+  { name: "Norfolk, VA; Groton, CT; Jacksonville, FL",         tz: "America/New_York",    lat: 36.85,  lon: -76.29, openH: 8, closeH: 16 },
+  { name: "London, England",                                    tz: "Europe/London",       lat: 51.51,  lon:  -0.13, openH: 8, closeH: 16 },
+  { name: "Naples & Sigonella, Italy; Rota, Spain",            tz: "Europe/Rome",         lat: 40.85,  lon:  14.27, openH: 8, closeH: 16 },
+  { name: "Bahrain",                                            tz: "Asia/Bahrain",        lat: 26.23,  lon:  50.58, openH: 8, closeH: 16 },
+  { name: "Diego Garcia",                                       tz: "Indian/Chagos",       lat: -7.32,  lon:  72.42, openH: 8, closeH: 16 },
+];
+
+const allMarkers = [
+  { parent: 0, label: "Yokosuka, Japan",     lat: 35.28,  lon: 139.67 },
+  { parent: 0, label: "Sasebo, Japan",        lat: 33.16,  lon: 129.72 },
+  { parent: 1, label: "Agana, Guam",          lat: 13.47,  lon: 144.75 },
+  { parent: 2, label: "Pearl Harbor, HI",     lat: 21.35,  lon:-157.95 },
+  { parent: 3, label: "San Diego, CA",        lat: 32.71,  lon:-117.16 },
+  { parent: 3, label: "Bremerton, WA",        lat: 47.57,  lon:-122.63 },
+  { parent: 4, label: "Pensacola, FL",        lat: 30.44,  lon: -87.19 },
+  { parent: 4, label: "Great Lakes, IL",      lat: 42.30,  lon: -87.85 },
+  { parent: 4, label: "Fort Worth, TX",       lat: 32.75,  lon: -97.33 },
+  { parent: 5, label: "Norfolk, VA",          lat: 36.85,  lon: -76.29 },
+  { parent: 5, label: "Groton, CT",           lat: 41.35,  lon: -72.08 },
+  { parent: 5, label: "Jacksonville, FL",     lat: 30.33,  lon: -81.66 },
+  { parent: 6, label: "London, England",      lat: 51.51,  lon:  -0.13 },
+  { parent: 7, label: "Naples, Italy",        lat: 40.85,  lon:  14.27 },
+  { parent: 7, label: "Sigonella, Italy",     lat: 37.40,  lon:  14.92 },
+  { parent: 7, label: "Rota, Spain",          lat: 36.62,  lon:  -6.35 },
+  { parent: 8, label: "Bahrain",              lat: 26.23,  lon:  50.58 },
+  { parent: 9, label: "Diego Garcia",         lat: -7.32,  lon:  72.42 },
+];
+
+// Country → approx UTC offset (ISO numeric code → offset)
+const countryOffsets = {
+  "840":-5,"124":-5,"484":-6,"076":-3,"032":-3,"152":-4,"170":-5,"604":-5,
+  "858":-3,"068":-4,"218":-5,"600":-4,"862":-4,"328":-4,"740":-3,"214":-4,
+  "332":-5,"188":-6,"320":-6,"340":-6,"222":-6,"558":-6,"591":-5,
+  "826":0,"250":1,"276":1,"380":1,"724":1,"620":0,"528":1,"056":1,
+  "756":1,"040":1,"616":1,"203":1,"703":1,"348":1,"642":2,"100":2,
+  "300":2,"792":3,"804":2,"112":3,"643":3,"818":2,"788":1,
+  "012":1,"504":1,"434":2,"404":3,"710":2,"566":1,"288":0,"384":0,
+  "894":2,"834":3,"800":3,"180":1,"024":1,"508":2,"450":3,
+  "356":5.5,"586":5,"050":6,"144":5.5,"104":6.5,"764":7,"704":7,
+  "360":7,"458":8,"608":8,"156":8,"496":8,"410":9,"392":9,
+  "036":10,"554":12,"598":9,"682":3,"364":3.5,"368":3,"760":2,
+  "400":2,"376":2,"275":2,"422":2,"414":3,"634":3,"784":4,
+  "512":4,"887":3,"231":3,"706":3,"716":2,"854":0,"466":0,
+  "562":1,"148":1,"646":2,"178":1,"226":1,"266":1,"120":1,
+  "729":2,"728":2,"232":3,"262":3,"174":3,"480":4,
+  "004":4.5,"860":5,"398":6,"795":5,"762":5,"417":6,
+  "116":7,"418":7,"158":8,"408":9,"702":8,"096":8,
+  "242":12,"090":12,
+  "352":0,"578":1,"752":1,"246":2,"208":1,"233":2,
+  "428":2,"440":2,"268":4,"051":4,"031":4,
+  "196":2,"470":1,"191":1,"705":1,"070":1,"688":1,
+  "499":1,"008":1,"807":1,
+};
+
+// ═══════════════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════════════
+function getHourInTZ(tz) {
+  const p = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz, hour: "numeric", minute: "numeric", hour12: false
+  }).formatToParts(getNow());
+  return parseInt(p.find(x => x.type === "hour").value) +
+         parseInt(p.find(x => x.type === "minute").value) / 60;
+}
+
+function formatTimeTZ(tz) {
+  return getNow().toLocaleTimeString("en-US", {
+    timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false
+  });
+}
+
+function getDayInTZ(tz) {
+  const p = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz, weekday: "short"
+  }).format(getNow());
+  return p; // "Mon","Tue",...,"Sat","Sun"
+}
+
+function isWeekendInTZ(tz) {
+  const day = getDayInTZ(tz);
+  return day === "Sat" || day === "Sun";
+}
+
+function isOpen(o) {
+  if (isWeekendInTZ(o.tz)) return false;
+  const h = getHourInTZ(o.tz);
+  return h >= o.openH && h < o.closeH;
+}
+
+function formatHour(h) {
+  h = ((h % 24) + 24) % 24;
+  const hr = Math.floor(h);
+  const min = Math.round((h - hr) * 60);
+  return `${String(hr).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
+}
+
+function convertHoursToTZ(office, targetTZ) {
+  const now = getNow();
+  const oNow = new Date(now.toLocaleString("en-US", { timeZone: office.tz }));
+  const tNow = new Date(now.toLocaleString("en-US", { timeZone: targetTZ }));
+  const diffH = (tNow - oNow) / 3600000;
+  return {
+    open:  formatHour(office.openH  + diffH),
+    close: formatHour(office.closeH + diffH)
+  };
+}
+
+// Calculate hours until next open, accounting for weekends
+function hoursUntilOpen(o) {
+  const now = getNow();
+  // Get current time in office TZ
+  const tzNow = new Date(now.toLocaleString("en-US", { timeZone: o.tz }));
+  const h = tzNow.getHours() + tzNow.getMinutes() / 60;
+  const dow = tzNow.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+
+  let daysToAdd = 0;
+  let hoursToOpen = o.openH - h;
+
+  if (dow === 6) { // Saturday
+    daysToAdd = 2; // skip to Monday
+    hoursToOpen = o.openH - h;
+  } else if (dow === 0) { // Sunday
+    daysToAdd = 1; // skip to Monday
+    hoursToOpen = o.openH - h;
+  } else if (h >= o.closeH) {
+    // After hours on weekday
+    if (dow === 5) { // Friday after hours
+      daysToAdd = 3; // skip to Monday
+      hoursToOpen = o.openH - h;
+    } else {
+      daysToAdd = 1; // next day
+      hoursToOpen = o.openH - h;
+    }
+  } else if (h < o.openH) {
+    // Before hours on weekday
+    daysToAdd = 0;
+    hoursToOpen = o.openH - h;
+  }
+
+  return daysToAdd * 24 + hoursToOpen;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CLOCKS & OFFICE LIST
+// ═══════════════════════════════════════════════════════════════
+function updateClocks() {
+  const now = getNow();
+
+  // Big clock: selected timezone
+  document.getElementById("localTime").textContent = now.toLocaleTimeString("en-US", {
+    timeZone: selectedTZ, hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
+  });
+  document.getElementById("localDate").textContent = now.toLocaleDateString("en-US", {
+    timeZone: selectedTZ, weekday: "short", year: "numeric", month: "short", day: "numeric"
+  });
+  document.getElementById("localLabel").textContent = getUserTZLabel();
+
+  // Small clock: UTC
+  document.getElementById("utcTime").textContent = now.toISOString().substring(11, 19);
+
+  // Sim mode indicator
+  const simIndicator = document.getElementById("simIndicator");
+  if (simIndicator) {
+    simIndicator.style.display = simTime ? "inline-block" : "none";
+  }
+
+  const list = document.getElementById("officesList");
+  list.innerHTML = "";
+  let count = 0;
+  const enriched = offices.map(o => {
+    const op = isOpen(o);
+    const h = getHourInTZ(o.tz);
+    let deltaH, countdownLabel;
+    if (op) {
+      deltaH = o.closeH - h;
+      countdownLabel = "closes in";
+    } else {
+      deltaH = hoursUntilOpen(o);
+      countdownLabel = "opens in";
+    }
+    return { ...o, op, h, deltaH, countdownLabel, weekend: isWeekendInTZ(o.tz) };
+  });
+
+  // Open offices: longest till close at top. Closed: soonest to open first, longest to open at bottom.
+  const sorted = enriched.sort((a, b) => {
+    if (a.op && !b.op) return -1;
+    if (!a.op && b.op) return 1;
+    if (a.op && b.op) return b.deltaH - a.deltaH;     // most time left at top
+    return a.deltaH - b.deltaH;                         // opens soonest first
+  });
+
+  sorted.forEach(o => {
+    if (o.op) count++;
+    const { deltaH, countdownLabel } = o;
+    const totalMin = Math.max(0, Math.floor(deltaH * 60));
+    const days = Math.floor(totalMin / (60 * 24));
+    const hrs = Math.floor((totalMin % (60 * 24)) / 60);
+    const mins = totalMin % 60;
+    let countdownStr;
+    if (days > 0) {
+      countdownStr = `${days}d ${hrs}h ${String(mins).padStart(2, '0')}m`;
+    } else {
+      countdownStr = `${hrs} hr${hrs !== 1 ? 's' : ''} ${String(mins).padStart(2, '0')} min`;
+    }
+    const closingSoon = o.op && deltaH <= 1;
+
+    const row = document.createElement("div");
+    row.className = `office-row ${o.op ? "open" : "closed"}`;
+    row.innerHTML = `
+      <div class="status-badge ${o.op ? "open" : "closed"}"></div>
+      <div class="office-name" title="${o.name}">${o.name}</div>
+      <div class="office-local-time">${formatTimeTZ(o.tz)}</div>
+      <div class="office-status-text ${o.op ? "open" : "closed"}">${o.op ? "Open" : (o.weekend ? "Weekend" : "Closed")}</div>
+      <div class="office-countdown ${closingSoon ? "closing-soon" : (o.op ? "open" : "closed")}">${countdownLabel} ${countdownStr}</div>`;
+    list.appendChild(row);
+  });
+  document.getElementById("openCount").innerHTML =
+    `<strong>${count}</strong> of ${offices.length} offices currently open`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// D3 MAP
+// ═══════════════════════════════════════════════════════════════
+let _mapFeatures = null;
+const mapContainer = document.getElementById("mapContainer");
+const tooltip = document.getElementById("tooltip");
+const W = 960, H = 500;
+
+const svg = d3.select("#mapContainer")
+  .append("svg")
+  .attr("viewBox", `0 0 ${W} ${H}`)
+  .attr("preserveAspectRatio", "xMidYMid meet");
+
+const projection = d3.geoNaturalEarth1().scale(155).translate([W / 2, H / 2]);
+const pathGen = d3.geoPath().projection(projection);
+
+// Layers — all inside a zoomable group
+const bgRect = svg.append("rect").attr("width", W).attr("height", H).attr("fill", "#080b10");
+const spherePath = svg.append("path").datum({ type: "Sphere" }).attr("d", pathGen)
+   .attr("fill", "#0c1018").attr("stroke", "#1c2232").attr("stroke-width", 0.5);
+
+const zoomGroup = svg.append("g").attr("class", "zoom-group");
+
+const tzLayer      = zoomGroup.append("g");
+const officeZoneLayer = zoomGroup.append("g");
+const countryLayer = zoomGroup.append("g");
+const userTZLayer  = zoomGroup.append("g"); // user's selected timezone band
+const markerLayer  = zoomGroup.append("g");
+
+zoomGroup.append("path").datum(d3.geoGraticule()()).attr("class", "graticule").attr("d", pathGen);
+
+// Zoom behavior (pinch, scroll, buttons)
+const zoom = d3.zoom()
+  .scaleExtent([1, 8])
+  .on("zoom", (event) => {
+    zoomGroup.attr("transform", event.transform);
+    // Also transform the sphere and bg to keep them aligned
+    spherePath.attr("transform", event.transform);
+  });
+
+svg.call(zoom);
+
+// Zoom control buttons
+document.getElementById("zoomIn").addEventListener("click", () => {
+  svg.transition().duration(300).call(zoom.scaleBy, 1.5);
+});
+document.getElementById("zoomOut").addEventListener("click", () => {
+  svg.transition().duration(300).call(zoom.scaleBy, 1 / 1.5);
+});
+document.getElementById("zoomReset").addEventListener("click", () => {
+  svg.transition().duration(400).call(zoom.transform, d3.zoomIdentity);
+});
+
+// Timezone bands
+function drawTZBands() {
+  const now = getNow();
+  const utcH = now.getUTCHours() + now.getUTCMinutes() / 60;
+  tzLayer.selectAll("*").remove();
+  for (let off = -12; off <= 12; off++) {
+    const local = ((utcH + off) % 24 + 24) % 24;
+    const work = local >= 8 && local < 16;
+    const l = off * 15 - 7.5, r = off * 15 + 7.5;
+    tzLayer.append("path")
+      .datum({ type: "Polygon", coordinates: [[[l,-90],[l,90],[r,90],[r,-90],[l,-90]]] })
+      .attr("d", pathGen)
+      .attr("fill", work ? "rgba(58,104,48,0.30)" : "rgba(8,11,16,0.50)")
+      .attr("stroke", "none");
+  }
+}
+
+// Countries
+function drawCountries(features) {
+  const now = getNow();
+  const utcH = now.getUTCHours() + now.getUTCMinutes() / 60;
+  countryLayer.selectAll("path")
+    .data(features)
+    .join("path")
+    .attr("d", pathGen)
+    .attr("stroke", "#2a3348")
+    .attr("stroke-width", 0.4)
+    .attr("fill", d => {
+      const off = countryOffsets[d.id] ?? null;
+      if (off === null) return "#161c28";
+      const local = ((utcH + off) % 24 + 24) % 24;
+      return (local >= 8 && local < 16) ? "#2e5025" : "#161c28";
+    });
+}
+
+// Office zone overlays — corrects for offices whose true tz
+// doesn't match their longitude band on the map
+function drawOfficeZones() {
+  officeZoneLayer.selectAll("*").remove();
+
+  // Define an SVG radial gradient if not yet present
+  let defs = svg.select("defs");
+  if (defs.empty()) defs = svg.append("defs");
+
+  if (defs.select("#openGlow").empty()) {
+    const gOpen = defs.append("radialGradient").attr("id", "openGlow");
+    gOpen.append("stop").attr("offset", "0%").attr("stop-color", "rgba(212,160,23,0.55)");
+    gOpen.append("stop").attr("offset", "100%").attr("stop-color", "rgba(212,160,23,0)");
+
+    const gClosed = defs.append("radialGradient").attr("id", "closedGlow");
+    gClosed.append("stop").attr("offset", "0%").attr("stop-color", "rgba(8,11,16,0.50)");
+    gClosed.append("stop").attr("offset", "100%").attr("stop-color", "rgba(8,11,16,0)");
+  }
+
+  allMarkers.forEach(m => {
+    const [x, y] = projection([m.lon, m.lat]);
+    if (x == null) return;
+    const office = offices[m.parent];
+    const op = isOpen(office);
+    const circle = officeZoneLayer.append("circle")
+      .attr("cx", x)
+      .attr("cy", y)
+      .attr("r", 28)
+      .attr("fill", op ? "url(#openGlow)" : "url(#closedGlow)")
+      .attr("pointer-events", "none");
+
+    if (op) {
+      circle.style("animation", "zoneGlow 2.5s ease-in-out infinite");
+    }
+  });
+}
+
+// User's selected timezone band
+function drawUserTZBand() {
+  userTZLayer.selectAll("*").remove();
+  // Compute the UTC offset of the selected timezone
+  const now = getNow();
+  const utcStr = now.toLocaleString("en-US", { timeZone: "UTC" });
+  const selStr = now.toLocaleString("en-US", { timeZone: selectedTZ });
+  const offsetH = Math.round((new Date(selStr) - new Date(utcStr)) / 3600000);
+  const lonCenter = offsetH * 15;
+  const lonLeft = lonCenter - 7.5;
+  const lonRight = lonCenter + 7.5;
+
+  const bandGeo = {
+    type: "Polygon",
+    coordinates: [[[lonLeft, -90], [lonLeft, 90], [lonRight, 90], [lonRight, -90], [lonLeft, -90]]]
+  };
+
+  userTZLayer.append("path")
+    .datum(bandGeo)
+    .attr("d", pathGen)
+    .attr("fill", "rgba(180, 180, 200, 0.12)")
+    .attr("stroke", "rgba(200, 200, 220, 0.25)")
+    .attr("stroke-width", 0.8)
+    .attr("stroke-dasharray", "4 3")
+    .attr("pointer-events", "none");
+}
+
+// Markers
+function drawMarkers() {
+  markerLayer.selectAll("*").remove();
+  pinnedMarker = null;
+  tooltip.classList.remove("visible", "pinned");
+  allMarkers.forEach((m, i) => {
+    const [x, y] = projection([m.lon, m.lat]);
+    if (x == null) return;
+    const office = offices[m.parent];
+    const op = isOpen(office);
+    const g = markerLayer.append("g")
+      .attr("class", "office-marker")
+      .attr("transform", `translate(${x},${y})`)
+      .style("cursor", "pointer");
+
+    if (op) {
+      g.append("circle").attr("class", "marker-pulse").attr("r", 6);
+      g.append("circle").attr("r", 10).attr("fill", "none")
+       .attr("stroke", "#f5c842").attr("stroke-width", 1.5).attr("opacity", 0.8);
+      g.append("circle").attr("r", 5.5).attr("fill", "#f5c842")
+       .style("filter", "drop-shadow(0 0 4px rgba(245,200,66,0.6))");
+    } else {
+      g.append("circle").attr("r", 9).attr("fill", "none")
+       .attr("stroke", "#6b7280").attr("stroke-width", 1).attr("opacity", 0.5);
+      g.append("circle").attr("r", 5).attr("fill", "#6b7280").attr("opacity", 0.6);
+    }
+
+    // Invisible hit area for easier hover/click
+    g.append("circle").attr("r", 14).attr("fill", "transparent");
+
+    g.on("mouseenter", ev => {
+      if (!pinnedMarker) showTooltip(ev, m, office);
+    });
+    g.on("mousemove", ev => {
+      if (!pinnedMarker) positionTooltip(ev);
+    });
+    g.on("mouseleave", () => {
+      if (!pinnedMarker) tooltip.classList.remove("visible");
+    });
+    g.on("click", ev => {
+      ev.stopPropagation();
+      if (pinnedMarker === g) {
+        // Unpin
+        pinnedMarker = null;
+        tooltip.classList.remove("visible", "pinned");
+      } else {
+        // Pin this one
+        pinnedMarker = g;
+        showTooltip(ev, m, office);
+        tooltip.classList.add("pinned");
+      }
+    });
+  });
+}
+
+// Load world
+d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(world => {
+  const features = topojson.feature(world, world.objects.countries).features;
+  _mapFeatures = features;
+  drawTZBands();
+  drawOfficeZones();
+  drawCountries(features);
+  drawUserTZBand();
+  drawMarkers();
+
+  // Refresh map every 60s (live mode only)
+  setInterval(() => {
+    if (simTime) return;
+    drawTZBands();
+    drawOfficeZones();
+    drawCountries(features);
+    drawUserTZBand();
+    drawMarkers();
+  }, 60000);
+});
+
+// ═══════════════════════════════════════════════════════════════
+// TOOLTIP
+// ═══════════════════════════════════════════════════════════════
+let pinnedMarker = null;
+
+// Click on map background to dismiss pinned tooltip
+svg.on("click", () => {
+  if (pinnedMarker) {
+    pinnedMarker = null;
+    tooltip.classList.remove("visible", "pinned");
+  }
+});
+
+// Prevent tooltip clicks from dismissing
+tooltip.addEventListener("click", ev => ev.stopPropagation());
+
+function showTooltip(event, marker, office) {
+  const op = isOpen(office);
+  const localTZ = selectedTZ;
+
+  // Countdown calc
+  const h = getHourInTZ(office.tz);
+  let deltaH;
+  if (op) {
+    deltaH = office.closeH - h;
+  } else {
+    deltaH = hoursUntilOpen(office);
+  }
+  const totalMin = Math.max(0, Math.floor(deltaH * 60));
+  const days = Math.floor(totalMin / (60 * 24));
+  const hrs = Math.floor((totalMin % (60 * 24)) / 60);
+  const mins = totalMin % 60;
+  let countdownStr;
+  if (days > 0) {
+    countdownStr = `${days}d ${hrs}h ${String(mins).padStart(2, "0")}m`;
+  } else {
+    countdownStr = `${hrs} hr${hrs !== 1 ? "s" : ""} ${String(mins).padStart(2, "0")} min`;
+  }
+  const weekend = isWeekendInTZ(office.tz);
+  const statusText = op
+    ? `Currently Open — closes in ${countdownStr}`
+    : `Currently Closed${weekend ? " (Weekend)" : ""} — opens in ${countdownStr}`;
+
+  const theirNow = formatTimeTZ(office.tz);
+  const yourNow  = formatTimeTZ(localTZ);
+  const utcNow   = formatTimeTZ("UTC");
+
+  const utcH   = convertHoursToTZ(office, "UTC");
+  const localH = convertHoursToTZ(office, localTZ);
+
+  tooltip.innerHTML = `
+    <div class="tt-location">${marker.label}</div>
+    <div class="tt-status ${op ? "open" : "closed"}">
+      <span class="tt-status-dot"></span>
+      ${statusText}
+    </div>
+    <hr class="tt-divider">
+    <div class="tt-section-title">Current Time</div>
+    <div class="tt-row">
+      <span class="tt-label">Their local</span>
+      <span class="tt-value">${theirNow}</span>
+    </div>
+    <div class="tt-row">
+      <span class="tt-label">Your local</span>
+      <span class="tt-value">${yourNow}</span>
+    </div>
+    <div class="tt-row">
+      <span class="tt-label">UTC</span>
+      <span class="tt-value">${utcNow}</span>
+    </div>
+    <div class="tt-spacer"></div>
+    <div class="tt-section-title">Office Hours (0800 – 1600)</div>
+    <div class="tt-row">
+      <span class="tt-label">Their local</span>
+      <span class="tt-value">08:00 – 16:00</span>
+    </div>
+    <div class="tt-row">
+      <span class="tt-label">Your time (${getUserTZShort()})</span>
+      <span class="tt-value">${localH.open} – ${localH.close}</span>
+    </div>
+    <div class="tt-row">
+      <span class="tt-label">UTC</span>
+      <span class="tt-value">${utcH.open} – ${utcH.close}</span>
+    </div>
+  `;
+
+  tooltip.classList.add("visible");
+  positionTooltip(event);
+}
+
+function positionTooltip(event) {
+  const box = mapContainer.getBoundingClientRect();
+  let x = event.clientX - box.left + 18;
+  let y = event.clientY - box.top - 20;
+  const tt = tooltip.getBoundingClientRect();
+  if (x + tt.width > box.width - 12) x = event.clientX - box.left - tt.width - 18;
+  if (y + tt.height > box.height - 12) y = box.height - tt.height - 12;
+  if (y < 12) y = 12;
+  tooltip.style.left = x + "px";
+  tooltip.style.top = y + "px";
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+initTZSelector();
+initTimeSim();
+updateClocks();
+setInterval(() => {
+  if (!simTime) updateClocks(); // only auto-tick in live mode
+}, 1000);
+</script>
+</body>
+</html>
