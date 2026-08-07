@@ -55,7 +55,7 @@
   .header {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 8px;
     margin-bottom: 24px;
   }
 
@@ -67,6 +67,17 @@
     text-transform: uppercase;
     color: var(--text-dim);
   }
+
+  .header-anchor {
+    height: 25px;   /* ~30% larger than the 19px title text */
+    width: auto;
+    flex-shrink: 0;
+    color: var(--text-dim);  /* same color as the title */
+    order: -1;               /* place before the title */
+    transform: translateY(-3px);  /* nudge up slightly */
+  }
+
+  .header-anchor path { fill: currentColor; }
 
   .top-row {
     display: grid;
@@ -165,7 +176,7 @@
 
   .offices-body {
     padding: 6px 0;
-    max-height: 210px;
+    max-height: 360px;
     overflow-y: auto;
   }
 
@@ -250,6 +261,70 @@
   }
 
   .open-count strong { color: var(--gold-light); }
+
+  /* ── Office Status controls ─────────────── */
+  .office-controls {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mini-select {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 4px 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' fill='none' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+    padding-right: 22px;
+  }
+
+  .mini-select:hover, .mini-select:focus { border-color: var(--gold); }
+  .mini-select option { background: var(--surface2); color: var(--text); }
+
+  .mini-btn {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 4px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .mini-btn:hover { border-color: var(--gold); color: var(--text); }
+
+  .mini-btn.active {
+    background: var(--green-dim);
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  .office-empty {
+    padding: 22px 18px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    color: var(--text-dim);
+  }
+
+  .office-status-text.holiday { color: #fb923c; background: rgba(251,146,60,0.12); }
 
   /* ── Map ───────────────────────────────── */
   .map-panel { animation-delay: 0.15s; margin-bottom: 18px; }
@@ -662,6 +737,41 @@
 <div class="dashboard">
   <div class="header">
     <h1>Navy Legal Assistance Global Coverage</h1>
+    <svg class="header-anchor" viewBox="0 0 1058 1280" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" aria-label="Anchor" role="img">
+      <g transform="translate(0,1280) scale(0.1,-0.1)" stroke="none">
+        <path d="M5125 12131 c-280 -46 -538 -199 -706 -420 -71 -94 -155 -267 -186
+-386 -23 -86 -26 -121 -27 -255 -1 -175 12 -252 67 -400 61 -162 168 -314 304
+-431 l63 -54 0 -367 0 -368 40 0 40 0 0 -230 0 -230 -40 0 c-36 0 -40 -2 -40
+-25 l0 -25 -867 0 -868 0 -45 57 c-208 262 -616 234 -790 -54 -176 -290 1
+-666 342 -723 163 -28 359 49 450 176 l31 44 874 0 c857 0 873 0 873 -19 0
+-16 8 -20 38 -23 l37 -3 3 -2015 c2 -1400 0 -2061 -8 -2165 -20 -276 -63 -476
+-265 -1240 -30 -115 -65 -271 -77 -345 -12 -74 -22 -136 -23 -137 0 -1 -33 11
+-72 27 -40 16 -118 40 -175 54 -324 80 -809 286 -1139 485 -278 166 -486 330
+-704 553 -158 161 -242 263 -350 423 -205 307 -322 590 -400 971 -4 19 2 21
+139 32 79 6 159 17 178 25 68 28 96 114 77 236 -23 157 -148 454 -304 727
+-128 223 -341 524 -370 524 -20 0 -107 -102 -184 -215 -201 -296 -355 -625
+-458 -980 -50 -174 -39 -235 49 -281 40 -21 161 -44 231 -44 34 0 68 -4 75 -9
+8 -5 22 -57 33 -122 161 -960 730 -1937 1524 -2618 575 -493 1240 -860 2069
+-1141 268 -90 340 -121 436 -185 78 -52 136 -113 181 -191 39 -70 74 -97 113
+-90 40 8 48 17 94 94 69 116 188 212 346 279 33 14 156 57 271 95 1164 387
+2065 978 2702 1775 480 601 804 1345 898 2063 l6 46 145 11 c214 17 252 43
+262 172 6 91 -14 174 -85 356 -93 236 -211 457 -378 710 -99 148 -178 251
+-208 269 -16 9 -25 4 -58 -34 -220 -248 -477 -748 -588 -1144 -48 -171 -38
+-251 38 -291 41 -21 161 -45 225 -45 30 0 68 -3 86 -6 l32 -7 -6 -52 c-9 -82
+-69 -309 -111 -420 -89 -240 -258 -535 -425 -740 -91 -113 -288 -313 -400
+-407 -230 -193 -473 -350 -775 -498 -234 -115 -418 -189 -657 -266 -213 -67
+-457 -148 -480 -158 -16 -7 -18 -2 -18 34 0 107 -35 292 -141 736 -110 465
+-149 678 -169 920 -6 73 -10 917 -10 2177 l0 2057 25 0 c18 0 25 5 25 20 0 20
+7 20 846 20 l846 0 63 -68 c261 -281 709 -173 819 197 77 261 -105 551 -379
+602 -168 32 -361 -42 -465 -176 l-42 -55 -844 0 -844 0 0 25 c0 20 -5 25 -25
+25 l-25 0 0 230 0 230 25 0 25 0 0 373 0 372 66 59 c578 517 435 1456 -272
+1787 -134 64 -254 90 -419 94 -77 2 -162 0 -190 -4z m336 -416 c182 -47 351
+-186 432 -356 59 -124 72 -181 71 -314 -3 -187 -66 -337 -199 -470 -78 -78
+-151 -125 -253 -163 -90 -34 -293 -43 -392 -17 -196 50 -357 180 -445 360 -51
+103 -69 183 -69 305 0 188 64 340 199 476 68 68 97 89 176 127 52 25 119 50
+149 56 30 6 64 13 75 15 38 9 191 -3 256 -19z"/>
+      </g>
+    </svg>
   </div>
 
   <div class="tz-selector-bar">
@@ -703,8 +813,18 @@
 
     <div class="panel">
       <div class="panel-header">
-        
         <span>Office Status</span>
+        <div class="office-controls">
+          <select id="regionFilter" class="mini-select" title="Filter by region">
+            <option value="all">All regions</option>
+            <option value="North America">North America</option>
+            <option value="Europe">Europe</option>
+            <option value="Middle East">Middle East</option>
+            <option value="Asia">Asia</option>
+            <option value="Pacific">Pacific</option>
+          </select>
+          <button id="openOnlyBtn" class="mini-btn" title="Show only offices currently open">Open only</button>
+        </div>
       </div>
       <div class="offices-body" id="officesList"></div>
       <div class="open-count" id="openCount"></div>
@@ -978,37 +1098,45 @@ function updateAll() {
 // ═══════════════════════════════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════════════════════════════
+// Each location is its own office. Region Legal Service Offices are
+// tagged with "(RLSO)" in the name.
 const offices = [
-  { name: "Yokosuka & Sasebo, Japan",                          tz: "Asia/Tokyo",          lat: 35.28,  lon: 139.67, openH: 8, closeH: 16 },
-  { name: "Agana, Guam",                                       tz: "Pacific/Guam",        lat: 13.47,  lon: 144.75, openH: 8, closeH: 16 },
-  { name: "Pearl Harbor, HI",                                  tz: "Pacific/Honolulu",    lat: 21.35,  lon:-157.95, openH: 8, closeH: 16 },
-  { name: "San Diego, CA & Bremerton, WA",                     tz: "America/Los_Angeles", lat: 32.71,  lon:-117.16, openH: 8, closeH: 16 },
-  { name: "Pensacola, FL; Great Lakes, IL; Fort Worth, TX",    tz: "America/Chicago",     lat: 30.44,  lon: -87.19, openH: 8, closeH: 16 },
-  { name: "Norfolk, VA; Groton, CT; Jacksonville, FL",         tz: "America/New_York",    lat: 36.85,  lon: -76.29, openH: 8, closeH: 16 },
-  { name: "London, England",                                    tz: "Europe/London",       lat: 51.51,  lon:  -0.13, openH: 8, closeH: 16 },
-  { name: "Naples & Sigonella, Italy; Rota, Spain",            tz: "Europe/Rome",         lat: 40.85,  lon:  14.27, openH: 8, closeH: 16 },
-  { name: "Bahrain",                                            tz: "Asia/Bahrain",        lat: 26.23,  lon:  50.58, openH: 8, closeH: 16 },
+  { name: "Bahrain",                                  tz: "Asia/Bahrain",        lat: 26.23,  lon:  50.58, openH: 8, closeH: 16 },
+  { name: "London, England",                          tz: "Europe/London",       lat: 51.51,  lon:  -0.13, openH: 8, closeH: 16 },
+  { name: "Naples, Italy (RLSO)",                     tz: "Europe/Rome",         lat: 40.85,  lon:  14.27, openH: 8, closeH: 16 },
+  { name: "Rota, Spain",                              tz: "Europe/Madrid",       lat: 36.62,  lon:  -6.35, openH: 8, closeH: 16 },
+  { name: "Sigonella, Sicily, Italy",                 tz: "Europe/Rome",         lat: 37.40,  lon:  14.92, openH: 8, closeH: 16 },
+  { name: "Norfolk/Virginia Beach/Oceana, VA (RLSO)", tz: "America/New_York",    lat: 36.85,  lon: -76.29, openH: 8, closeH: 16 },
+  { name: "Groton, Connecticut",                      tz: "America/New_York",    lat: 41.35,  lon: -72.08, openH: 8, closeH: 16 },
+  { name: "Great Lakes, Illinois",                    tz: "America/Chicago",     lat: 42.30,  lon: -87.85, openH: 8, closeH: 16 },
+  { name: "Pentagon JLAO, Virginia",                  tz: "America/New_York",    lat: 38.87,  lon: -77.06, openH: 8, closeH: 16 },
+  { name: "Washington D.C. / Navy Yard (RLSO)",       tz: "America/New_York",    lat: 38.87,  lon: -76.99, openH: 8, closeH: 16 },
+  { name: "Hawaii / Pearl Harbor",                    tz: "Pacific/Honolulu",    lat: 21.35,  lon:-157.95, openH: 8, closeH: 16 },
+  { name: "Bremerton/Bangor, Washington (RLSO)",      tz: "America/Los_Angeles", lat: 47.57,  lon:-122.63, openH: 8, closeH: 16 },
+  { name: "Everett, Washington",                      tz: "America/Los_Angeles", lat: 47.98,  lon:-122.20, openH: 8, closeH: 16 },
+  { name: "Whidbey Island, Washington",               tz: "America/Los_Angeles", lat: 48.35,  lon:-122.66, openH: 8, closeH: 16 },
+  { name: "Corpus Christi, Texas",                    tz: "America/Chicago",     lat: 27.80,  lon: -97.40, openH: 8, closeH: 16 },
+  { name: "Fort Worth, Texas",                        tz: "America/Chicago",     lat: 32.75,  lon: -97.33, openH: 8, closeH: 16 },
+  { name: "Guantanamo Bay, Cuba",                     tz: "America/Havana",      lat: 19.90,  lon: -75.15, openH: 8, closeH: 16 },
+  { name: "Gulfport, Mississippi",                    tz: "America/Chicago",     lat: 30.37,  lon: -89.09, openH: 8, closeH: 16 },
+  { name: "Jacksonville, Florida (RLSO)",             tz: "America/New_York",    lat: 30.33,  lon: -81.66, openH: 8, closeH: 16 },
+  { name: "Kings Bay, Georgia",                       tz: "America/New_York",    lat: 30.80,  lon: -81.55, openH: 8, closeH: 16 },
+  { name: "Mayport, Florida",                         tz: "America/New_York",    lat: 30.39,  lon: -81.42, openH: 8, closeH: 16 },
+  { name: "Millington, Tennessee",                    tz: "America/Chicago",     lat: 35.34,  lon: -89.90, openH: 8, closeH: 16 },
+  { name: "New Orleans, Louisiana",                   tz: "America/Chicago",     lat: 29.95,  lon: -90.07, openH: 8, closeH: 16 },
+  { name: "Pensacola, Florida",                       tz: "America/Chicago",     lat: 30.44,  lon: -87.19, openH: 8, closeH: 16 },
+  { name: "Lemoore, California",                      tz: "America/Los_Angeles", lat: 36.30,  lon:-119.78, openH: 8, closeH: 16 },
+  { name: "San Diego, California (RLSO)",             tz: "America/Los_Angeles", lat: 32.71,  lon:-117.16, openH: 8, closeH: 16 },
+  { name: "Ventura, California",                      tz: "America/Los_Angeles", lat: 34.27,  lon:-119.23, openH: 8, closeH: 16 },
+  { name: "Guam",                                     tz: "Pacific/Guam",        lat: 13.47,  lon: 144.75, openH: 8, closeH: 16 },
+  { name: "Sasebo, Japan",                            tz: "Asia/Tokyo",          lat: 33.16,  lon: 129.72, openH: 8, closeH: 16 },
+  { name: "Yokosuka, Japan (RLSO)",                   tz: "Asia/Tokyo",          lat: 35.28,  lon: 139.67, openH: 8, closeH: 16 },
 ];
 
-const allMarkers = [
-  { parent: 0, label: "Yokosuka, Japan",     lat: 35.28,  lon: 139.67 },
-  { parent: 0, label: "Sasebo, Japan",        lat: 33.16,  lon: 129.72 },
-  { parent: 1, label: "Agana, Guam",          lat: 13.47,  lon: 144.75 },
-  { parent: 2, label: "Pearl Harbor, HI",     lat: 21.35,  lon:-157.95 },
-  { parent: 3, label: "San Diego, CA",        lat: 32.71,  lon:-117.16 },
-  { parent: 3, label: "Bremerton, WA",        lat: 47.57,  lon:-122.63 },
-  { parent: 4, label: "Pensacola, FL",        lat: 30.44,  lon: -87.19 },
-  { parent: 4, label: "Great Lakes, IL",      lat: 42.30,  lon: -87.85 },
-  { parent: 4, label: "Fort Worth, TX",       lat: 32.75,  lon: -97.33 },
-  { parent: 5, label: "Norfolk, VA",          lat: 36.85,  lon: -76.29 },
-  { parent: 5, label: "Groton, CT",           lat: 41.35,  lon: -72.08 },
-  { parent: 5, label: "Jacksonville, FL",     lat: 30.33,  lon: -81.66 },
-  { parent: 6, label: "London, England",      lat: 51.51,  lon:  -0.13 },
-  { parent: 7, label: "Naples, Italy",        lat: 40.85,  lon:  14.27 },
-  { parent: 7, label: "Sigonella, Italy",     lat: 37.40,  lon:  14.92 },
-  { parent: 7, label: "Rota, Spain",          lat: 36.62,  lon:  -6.35 },
-  { parent: 8, label: "Bahrain",              lat: 26.23,  lon:  50.58 },
-];
+// One map marker per office, generated directly so the two stay in sync.
+const allMarkers = offices.map((o, i) => ({
+  parent: i, label: o.name, lat: o.lat, lon: o.lon
+}));
 
 // Country → approx UTC offset (ISO numeric code → offset)
 const countryOffsets = {
@@ -1035,6 +1163,107 @@ const countryOffsets = {
   "196":2,"470":1,"191":1,"705":1,"070":1,"688":1,
   "499":1,"008":1,"807":1,
 };
+
+// ═══════════════════════════════════════════════════════════════
+// FILTER STATE
+// ═══════════════════════════════════════════════════════════════
+let showOpenOnly = false;
+let regionFilter = "all";
+
+// Group each office into a broad region, derived from its timezone.
+function regionOf(o) {
+  const tz = o.tz;
+  if (tz === "Asia/Bahrain") return "Middle East";
+  if (tz.startsWith("Europe/")) return "Europe";
+  if (tz === "Asia/Tokyo") return "Asia";
+  if (tz === "Pacific/Guam" || tz === "Pacific/Honolulu") return "Pacific";
+  return "North America"; // all America/* incl. Guantanamo Bay
+}
+
+// US bases/territories observe US federal holidays; overseas
+// (Europe, Bahrain, Japan) do not.
+function observesUSHolidays(o) {
+  const tz = o.tz;
+  if (tz.startsWith("Europe/")) return false;
+  if (tz === "Asia/Bahrain") return false;
+  if (tz === "Asia/Tokyo") return false;
+  return true;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// US FEDERAL HOLIDAYS
+// ═══════════════════════════════════════════════════════════════
+function _ymdOf(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+const _holidayCache = {};
+function usHolidaysForYear(year) {
+  if (_holidayCache[year]) return _holidayCache[year];
+  const set = new Set();
+
+  // Fixed-date holidays, with weekend → nearest-weekday "observed" shift
+  const addFixed = (m, d) => {
+    const dt = new Date(year, m - 1, d);
+    set.add(_ymdOf(dt));
+    const dow = dt.getDay();
+    if (dow === 6) set.add(_ymdOf(new Date(year, m - 1, d - 1))); // Sat → Fri
+    else if (dow === 0) set.add(_ymdOf(new Date(year, m - 1, d + 1))); // Sun → Mon
+  };
+  addFixed(1, 1);    // New Year's Day
+  addFixed(6, 19);   // Juneteenth
+  addFixed(7, 4);    // Independence Day
+  addFixed(11, 11);  // Veterans Day
+  addFixed(12, 25);  // Christmas Day
+
+  // Floating holidays (always land on a weekday)
+  const nthWeekday = (m, weekday, n) => {
+    let count = 0;
+    for (let day = 1; day <= 31; day++) {
+      const dt = new Date(year, m - 1, day);
+      if (dt.getMonth() !== m - 1) break;
+      if (dt.getDay() === weekday && ++count === n) { set.add(_ymdOf(dt)); return; }
+    }
+  };
+  const lastWeekday = (m, weekday) => {
+    let last = null;
+    for (let day = 1; day <= 31; day++) {
+      const dt = new Date(year, m - 1, day);
+      if (dt.getMonth() !== m - 1) break;
+      if (dt.getDay() === weekday) last = dt;
+    }
+    if (last) set.add(_ymdOf(last));
+  };
+  nthWeekday(1, 1, 3);   // MLK Day — 3rd Monday of January
+  nthWeekday(2, 1, 3);   // Presidents' Day — 3rd Monday of February
+  lastWeekday(5, 1);     // Memorial Day — last Monday of May
+  nthWeekday(9, 1, 1);   // Labor Day — 1st Monday of September
+  nthWeekday(10, 1, 2);  // Columbus Day — 2nd Monday of October
+  nthWeekday(11, 4, 4);  // Thanksgiving — 4th Thursday of November
+
+  _holidayCache[year] = set;
+  return set;
+}
+
+// Is the given office-local wall-clock date a US federal holiday?
+// Checks neighbouring years too, so observed shifts across Dec 31 / Jan 1 are caught.
+function isHolidayDate(o, dateObj) {
+  if (!observesUSHolidays(o)) return false;
+  const s = _ymdOf(dateObj);
+  const y = dateObj.getFullYear();
+  return usHolidaysForYear(y).has(s) ||
+         usHolidaysForYear(y + 1).has(s) ||
+         usHolidaysForYear(y - 1).has(s);
+}
+
+// Office-local "today" as a wall-clock Date, for weekend/holiday checks.
+function officeLocalDate(o) {
+  return new Date(getNow().toLocaleString("en-US", { timeZone: o.tz }));
+}
+
+function isHolidayToday(o) {
+  return isHolidayDate(o, officeLocalDate(o));
+}
 
 // ═══════════════════════════════════════════════════════════════
 // UTILITIES
@@ -1067,6 +1296,7 @@ function isWeekendInTZ(tz) {
 
 function isOpen(o) {
   if (isWeekendInTZ(o.tz)) return false;
+  if (isHolidayToday(o)) return false;
   const h = getHourInTZ(o.tz);
   return h >= o.openH && h < o.closeH;
 }
@@ -1089,39 +1319,36 @@ function convertHoursToTZ(office, targetTZ) {
   };
 }
 
-// Calculate hours until next open, accounting for weekends
+// Is a wall-clock Date a working day for this office (not weekend, not holiday)?
+function isWorkingDay(o, dateObj) {
+  const dow = dateObj.getDay();
+  if (dow === 0 || dow === 6) return false;
+  if (isHolidayDate(o, dateObj)) return false;
+  return true;
+}
+
+// Calculate hours until next open, skipping weekends AND holidays.
 function hoursUntilOpen(o) {
-  const now = getNow();
-  // Get current time in office TZ
-  const tzNow = new Date(now.toLocaleString("en-US", { timeZone: o.tz }));
+  const tzNow = officeLocalDate(o);
   const h = tzNow.getHours() + tzNow.getMinutes() / 60;
-  const dow = tzNow.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
 
-  let daysToAdd = 0;
-  let hoursToOpen = o.openH - h;
-
-  if (dow === 6) { // Saturday
-    daysToAdd = 2; // skip to Monday
-    hoursToOpen = o.openH - h;
-  } else if (dow === 0) { // Sunday
-    daysToAdd = 1; // skip to Monday
-    hoursToOpen = o.openH - h;
-  } else if (h >= o.closeH) {
-    // After hours on weekday
-    if (dow === 5) { // Friday after hours
-      daysToAdd = 3; // skip to Monday
-      hoursToOpen = o.openH - h;
-    } else {
-      daysToAdd = 1; // next day
-      hoursToOpen = o.openH - h;
-    }
-  } else if (h < o.openH) {
-    // Before hours on weekday
-    daysToAdd = 0;
-    hoursToOpen = o.openH - h;
+  // Can it still open later today?
+  if (isWorkingDay(o, tzNow) && h < o.openH) {
+    return o.openH - h;
   }
 
-  return daysToAdd * 24 + hoursToOpen;
+  // Otherwise walk forward day by day to the next working day.
+  const cursor = new Date(tzNow);
+  let dayCount = 0;
+  do {
+    cursor.setDate(cursor.getDate() + 1);
+    dayCount++;
+  } while (!isWorkingDay(o, cursor));
+
+  // hours left in today + full intervening days + openH on the target day
+  const hoursLeftToday = 24 - h;
+  const fullDays = dayCount - 1;
+  return hoursLeftToday + fullDays * 24 + o.openH;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1150,7 +1377,7 @@ function updateClocks() {
 
   const list = document.getElementById("officesList");
   list.innerHTML = "";
-  let count = 0;
+
   const enriched = offices.map(o => {
     const op = isOpen(o);
     const h = getHourInTZ(o.tz);
@@ -1162,19 +1389,42 @@ function updateClocks() {
       deltaH = hoursUntilOpen(o);
       countdownLabel = "opens in";
     }
-    return { ...o, op, h, deltaH, countdownLabel, weekend: isWeekendInTZ(o.tz) };
+    return {
+      ...o, op, h, deltaH, countdownLabel,
+      weekend: isWeekendInTZ(o.tz),
+      holiday: isHolidayToday(o),
+      region: regionOf(o)
+    };
   });
 
-  // Open offices: longest till close at top. Closed: soonest to open first, longest to open at bottom.
-  const sorted = enriched.sort((a, b) => {
+  // Region filter applies to the whole panel (list + footer count).
+  const regionSet = regionFilter === "all"
+    ? enriched
+    : enriched.filter(o => o.region === regionFilter);
+
+  const openInRegion = regionSet.filter(o => o.op).length;
+
+  // Open-only toggle only affects which rows are shown.
+  let visible = showOpenOnly ? regionSet.filter(o => o.op) : regionSet;
+
+  // Open offices: longest till close at top. Closed: soonest to open first.
+  visible = visible.sort((a, b) => {
     if (a.op && !b.op) return -1;
     if (!a.op && b.op) return 1;
-    if (a.op && b.op) return b.deltaH - a.deltaH;     // most time left at top
-    return a.deltaH - b.deltaH;                         // opens soonest first
+    if (a.op && b.op) return b.deltaH - a.deltaH;
+    return a.deltaH - b.deltaH;
   });
 
-  sorted.forEach(o => {
-    if (o.op) count++;
+  if (visible.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "office-empty";
+    empty.textContent = showOpenOnly
+      ? `No offices currently open${regionFilter === "all" ? "" : " in " + regionFilter}.`
+      : `No offices in ${regionFilter}.`;
+    list.appendChild(empty);
+  }
+
+  visible.forEach(o => {
     const { deltaH, countdownLabel } = o;
     const totalMin = Math.max(0, Math.floor(deltaH * 60));
     const days = Math.floor(totalMin / (60 * 24));
@@ -1187,6 +1437,8 @@ function updateClocks() {
       countdownStr = `${hrs} hr${hrs !== 1 ? 's' : ''} ${String(mins).padStart(2, '0')} min`;
     }
     const closingSoon = o.op && deltaH <= 1;
+    const statusClass = o.op ? "open" : (o.holiday ? "holiday" : "closed");
+    const statusLabel = o.op ? "Open" : (o.weekend ? "Weekend" : (o.holiday ? "Holiday" : "Closed"));
 
     const row = document.createElement("div");
     row.className = `office-row ${o.op ? "open" : "closed"}`;
@@ -1194,12 +1446,14 @@ function updateClocks() {
       <div class="status-badge ${o.op ? "open" : "closed"}"></div>
       <div class="office-name" title="${o.name}">${o.name}</div>
       <div class="office-local-time">${formatTimeTZ(o.tz)}</div>
-      <div class="office-status-text ${o.op ? "open" : "closed"}">${o.op ? "Open" : (o.weekend ? "Weekend" : "Closed")}</div>
+      <div class="office-status-text ${statusClass}">${statusLabel}</div>
       <div class="office-countdown ${closingSoon ? "closing-soon" : (o.op ? "open" : "closed")}">${countdownLabel} ${countdownStr}</div>`;
     list.appendChild(row);
   });
+
+  const scopeLabel = regionFilter === "all" ? "offices" : `${regionFilter} offices`;
   document.getElementById("openCount").innerHTML =
-    `<strong>${count}</strong> of ${offices.length} offices currently open`;
+    `<strong>${openInRegion}</strong> of ${regionSet.length} ${scopeLabel} currently open`;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1469,9 +1723,11 @@ function showTooltip(event, marker, office) {
     countdownStr = `${hrs} hr${hrs !== 1 ? "s" : ""} ${String(mins).padStart(2, "0")} min`;
   }
   const weekend = isWeekendInTZ(office.tz);
+  const holiday = isHolidayToday(office);
+  const reason = holiday ? " (Holiday)" : (weekend ? " (Weekend)" : "");
   const statusText = op
     ? `Currently Open — closes in ${countdownStr}`
-    : `Currently Closed${weekend ? " (Weekend)" : ""} — opens in ${countdownStr}`;
+    : `Currently Closed${reason} — opens in ${countdownStr}`;
 
   const theirNow = formatTimeTZ(office.tz);
   const yourNow  = formatTimeTZ(localTZ);
@@ -1535,6 +1791,18 @@ function positionTooltip(event) {
 // ═══════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════
+// Office Status filters
+document.getElementById("openOnlyBtn").addEventListener("click", function () {
+  showOpenOnly = !showOpenOnly;
+  this.classList.toggle("active", showOpenOnly);
+  this.textContent = showOpenOnly ? "Show all" : "Open only";
+  updateClocks();
+});
+document.getElementById("regionFilter").addEventListener("change", function () {
+  regionFilter = this.value;
+  updateClocks();
+});
+
 initTZSelector();
 initTimeSim();
 updateClocks();
